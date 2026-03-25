@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>SYNTAXTERROR - Multiplayer Arena</title>
+  <title>SYNTAXTERROR - IT Quiz & Lernkarten</title>
   <link rel="stylesheet" href="style.css">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
 </head>
@@ -14,7 +14,7 @@
   <div id="screen-menu" class="screen active">
     <div class="logo-container">
       <h1 class="logo glitch" data-text="SYNTAXTERROR">SYNTAXTERROR</h1>
-      <p class="subtitle">Multiplayer Arena &mdash; Kein Erbarmen</p>
+      <p class="subtitle">IT Quiz & Lernkarten &mdash; Kein Erbarmen</p>
     </div>
     <div class="menu-card">
       <div class="input-group">
@@ -27,16 +27,20 @@
       </div>
       <div class="btn-group">
         <button id="btn-create" class="btn btn-primary">
-          <span class="btn-icon">+</span> Raum erstellen
+          <span class="btn-icon">+</span> Quiz-Raum erstellen
         </button>
         <div class="divider"><span>oder</span></div>
         <div class="join-row">
           <input type="text" id="room-code" maxlength="5" placeholder="CODE" class="code-input" autocomplete="off">
           <button id="btn-join" class="btn btn-secondary">Beitreten</button>
         </div>
+        <div class="divider"><span>solo</span></div>
+        <button id="btn-flashcards" class="btn btn-secondary" style="width:100%">
+          📚 Lernkarten
+        </button>
       </div>
     </div>
-    <p class="footer-text">2-20 Spieler &bull; 4 Game Modes &bull; Kein Erbarmen</p>
+    <p class="footer-text">2-20 Spieler &bull; 100+ Fragen &bull; Kein Erbarmen</p>
   </div>
 
   <!-- ── LOBBY ─────────────────────────────────────────────── -->
@@ -51,95 +55,31 @@
     </div>
     <div class="lobby-content">
       <div class="players-grid" id="players-grid"></div>
-
-      <!-- HOST SETTINGS -->
       <div id="host-settings" class="settings-panel" style="display:none">
-        <h3>Game Mode</h3>
-        <div class="mode-selector" id="mode-selector">
-          <button class="mode-btn active" data-mode="quiz">
-            <span class="mode-icon">🧠</span>
-            <span class="mode-name">IT Quiz</span>
-            <span class="mode-desc">Kahoot aber brutal</span>
-          </button>
-          <button class="mode-btn" data-mode="typing">
-            <span class="mode-icon">⌨️</span>
-            <span class="mode-name">Speed Typing</span>
-            <span class="mode-desc">Code tippen auf Zeit</span>
-          </button>
-          <button class="mode-btn" data-mode="estimation">
-            <span class="mode-icon">🎯</span>
-            <span class="mode-name">Schätz-Arena</span>
-            <span class="mode-desc">Wer liegt am nächsten?</span>
-          </button>
-          <button class="mode-btn" data-mode="emoji">
-            <span class="mode-icon">👾</span>
-            <span class="mode-name">Emoji Roulette</span>
-            <span class="mode-desc">Reaktionstest</span>
-          </button>
-        </div>
-
-        <h3 style="margin-top:20px">Einstellungen</h3>
-        <div id="settings-quiz" class="mode-settings">
-          <label style="font-size:.8rem;color:var(--text-dim);text-transform:uppercase;letter-spacing:1px;display:block;margin-bottom:8px">Kategorien</label>
-          <div class="category-selector" id="category-selector"></div>
-          <div class="setting-row">
-            <label>Fragen</label>
-            <div class="setting-control">
-              <button class="btn-sm" data-setting="questionCount" data-delta="-5">-</button>
-              <span id="setting-questions">15</span>
-              <button class="btn-sm" data-setting="questionCount" data-delta="5">+</button>
-            </div>
-          </div>
-          <div class="setting-row">
-            <label>Sekunden pro Frage</label>
-            <div class="setting-control">
-              <button class="btn-sm" data-setting="timePerQuestion" data-delta="-5">-</button>
-              <span id="setting-time">15</span>
-              <button class="btn-sm" data-setting="timePerQuestion" data-delta="5">+</button>
-            </div>
+        <h3>Einstellungen</h3>
+        <label style="font-size:.8rem;color:var(--text-dim);text-transform:uppercase;letter-spacing:1px;display:block;margin-bottom:8px">Kategorien</label>
+        <div class="category-selector" id="category-selector"></div>
+        <div class="setting-row">
+          <label>Fragen</label>
+          <div class="setting-control">
+            <button class="btn-sm" data-setting="questionCount" data-delta="-5">-</button>
+            <span id="setting-questions">15</span>
+            <button class="btn-sm" data-setting="questionCount" data-delta="5">+</button>
           </div>
         </div>
-        <div id="settings-typing" class="mode-settings" style="display:none">
-          <div class="setting-row">
-            <label>Runden</label>
-            <div class="setting-control">
-              <button class="btn-sm" data-setting="typingRounds" data-delta="-1">-</button>
-              <span id="setting-typing-rounds">10</span>
-              <button class="btn-sm" data-setting="typingRounds" data-delta="1">+</button>
-            </div>
+        <div class="setting-row">
+          <label>Sekunden pro Frage</label>
+          <div class="setting-control">
+            <button class="btn-sm" data-setting="timePerQuestion" data-delta="-5">-</button>
+            <span id="setting-time">15</span>
+            <button class="btn-sm" data-setting="timePerQuestion" data-delta="5">+</button>
           </div>
         </div>
-        <div id="settings-estimation" class="mode-settings" style="display:none">
-          <div class="setting-row">
-            <label>Fragen</label>
-            <div class="setting-control">
-              <button class="btn-sm" data-setting="questionCount" data-delta="-5">-</button>
-              <span id="setting-est-questions">15</span>
-              <button class="btn-sm" data-setting="questionCount" data-delta="5">+</button>
-            </div>
-          </div>
-        </div>
-        <div id="settings-emoji" class="mode-settings" style="display:none">
-          <div class="setting-row">
-            <label>Runden</label>
-            <div class="setting-control">
-              <button class="btn-sm" data-setting="emojiRounds" data-delta="-1">-</button>
-              <span id="setting-emoji-rounds">8</span>
-              <button class="btn-sm" data-setting="emojiRounds" data-delta="1">+</button>
-            </div>
-          </div>
-        </div>
-
-        <button id="btn-start" class="btn btn-primary btn-large" style="margin-top:20px">
-          🚀 Spiel starten
-        </button>
+        <button id="btn-start" class="btn btn-primary btn-large" style="margin-top:20px">🚀 Spiel starten</button>
       </div>
-
-      <!-- GUEST WAITING -->
       <div id="guest-waiting" class="waiting-panel" style="display:none">
         <button id="btn-ready" class="btn btn-secondary btn-large">✓ Bereit</button>
         <p class="waiting-text">Warte auf den Host...</p>
-        <p class="mode-display" id="guest-mode-display">Mode: 🧠 IT Quiz</p>
       </div>
     </div>
   </div>
@@ -147,25 +87,19 @@
   <!-- ── COUNTDOWN ─────────────────────────────────────────── -->
   <div id="screen-countdown" class="screen">
     <div class="countdown-number" id="countdown-num">3</div>
-    <p class="countdown-mode" id="countdown-mode"></p>
   </div>
 
   <!-- ── QUIZ QUESTION ─────────────────────────────────────── -->
   <div id="screen-quiz" class="screen">
     <div class="question-header">
-      <div class="question-progress">
-        <span id="q-index">1</span>/<span id="q-total">15</span>
-      </div>
-      <div class="timer-bar-container">
-        <div class="timer-bar" id="timer-bar"></div>
-      </div>
+      <div class="question-progress"><span id="q-index">1</span>/<span id="q-total">15</span></div>
+      <div class="timer-bar-container"><div class="timer-bar" id="timer-bar"></div></div>
       <div class="timer-text" id="timer-text">15</div>
     </div>
     <div class="question-text" id="question-text"></div>
     <div class="answers-grid" id="answers-grid"></div>
     <div class="waiting-answer" id="waiting-answer" style="display:none">
-      <div class="pulse-dot"></div>
-      <span>Warte auf andere Spieler...</span>
+      <div class="pulse-dot"></div><span>Warte auf andere Spieler...</span>
     </div>
   </div>
 
@@ -179,102 +113,6 @@
     </div>
   </div>
 
-  <!-- ── TYPING SCREEN ─────────────────────────────────────── -->
-  <div id="screen-typing" class="screen">
-    <div class="question-header">
-      <div class="question-progress">
-        <span id="t-index">1</span>/<span id="t-total">10</span>
-      </div>
-      <div class="timer-bar-container">
-        <div class="timer-bar" id="typing-timer-bar"></div>
-      </div>
-      <div class="timer-text" id="typing-timer-text">30</div>
-    </div>
-    <div class="typing-container">
-      <div class="typing-lang" id="typing-lang">JavaScript</div>
-      <div class="typing-target" id="typing-target"></div>
-      <input type="text" id="typing-input" class="typing-input" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="Tippe den Code hier...">
-      <div class="typing-stats">
-        <span id="typing-errors">Fehler: 0</span>
-        <span id="typing-time">0.0s</span>
-      </div>
-    </div>
-    <div class="waiting-answer" id="typing-waiting" style="display:none">
-      <div class="pulse-dot"></div>
-      <span>Warte auf andere Spieler...</span>
-    </div>
-  </div>
-
-  <!-- ── TYPING RESULT ─────────────────────────────────────── -->
-  <div id="screen-typing-result" class="screen">
-    <div class="result-container">
-      <h3 class="result-title">Runden-Ergebnis</h3>
-      <div class="typing-results-list" id="typing-results-list"></div>
-      <div class="mini-leaderboard" id="typing-leaderboard"></div>
-    </div>
-  </div>
-
-  <!-- ── ESTIMATION SCREEN ─────────────────────────────────── -->
-  <div id="screen-estimation" class="screen">
-    <div class="question-header">
-      <div class="question-progress">
-        <span id="e-index">1</span>/<span id="e-total">15</span>
-      </div>
-      <div class="timer-bar-container">
-        <div class="timer-bar" id="est-timer-bar"></div>
-      </div>
-      <div class="timer-text" id="est-timer-text">20</div>
-    </div>
-    <div class="question-text" id="est-question"></div>
-    <div class="estimation-input-area">
-      <input type="number" id="est-input" class="est-input" placeholder="Deine Schätzung..." autocomplete="off" step="any">
-      <span class="est-unit" id="est-unit"></span>
-      <button id="est-submit" class="btn btn-primary">Abgeben!</button>
-    </div>
-    <div class="waiting-answer" id="est-waiting" style="display:none">
-      <div class="pulse-dot"></div>
-      <span>Warte auf andere Spieler...</span>
-    </div>
-  </div>
-
-  <!-- ── ESTIMATION RESULT ─────────────────────────────────── -->
-  <div id="screen-estimation-result" class="screen">
-    <div class="result-container">
-      <div class="est-answer-display" id="est-answer-display"></div>
-      <div class="result-roast" id="est-fun"></div>
-      <div class="est-results-list" id="est-results-list"></div>
-      <div class="mini-leaderboard" id="est-leaderboard"></div>
-    </div>
-  </div>
-
-  <!-- ── EMOJI SCREEN ──────────────────────────────────────── -->
-  <div id="screen-emoji" class="screen">
-    <div class="question-header">
-      <div class="question-progress">
-        <span id="em-index">1</span>/<span id="em-total">8</span>
-      </div>
-      <div style="flex:1"></div>
-      <div class="emoji-target-display">Finde: <span id="emoji-target" class="emoji-target-icon"></span></div>
-    </div>
-    <div class="emoji-display-area">
-      <div class="emoji-current" id="emoji-current"></div>
-    </div>
-    <button id="emoji-tap-btn" class="btn btn-primary btn-emoji-tap">TAP!</button>
-    <div class="waiting-answer" id="emoji-waiting" style="display:none">
-      <div class="pulse-dot"></div>
-      <span>Warte auf Runden-Ende...</span>
-    </div>
-  </div>
-
-  <!-- ── EMOJI RESULT ──────────────────────────────────────── -->
-  <div id="screen-emoji-result" class="screen">
-    <div class="result-container">
-      <h3 class="result-title">Reaktions-Ergebnis</h3>
-      <div class="emoji-results-list" id="emoji-results-list"></div>
-      <div class="mini-leaderboard" id="emoji-leaderboard"></div>
-    </div>
-  </div>
-
   <!-- ── GAME OVER ─────────────────────────────────────────── -->
   <div id="screen-gameover" class="screen">
     <div class="gameover-container">
@@ -285,10 +123,49 @@
         <button id="btn-toggle-stats" class="btn btn-secondary" style="margin-bottom:16px">📊 Statistik anzeigen</button>
         <div id="stats-container" class="stats-container" style="display:none"></div>
       </div>
-      <button id="btn-play-again" class="btn btn-primary btn-large" style="display:none">
-        🔄 Nochmal spielen
-      </button>
+      <button id="btn-play-again" class="btn btn-primary btn-large" style="display:none">🔄 Nochmal spielen</button>
       <button id="btn-back-menu" class="btn btn-secondary">Zurück zum Menü</button>
+    </div>
+  </div>
+
+  <!-- ── FLASHCARDS ────────────────────────────────────────── -->
+  <div id="screen-flashcards" class="screen">
+    <div class="fc-header">
+      <button id="fc-back" class="btn btn-secondary">← Zurück</button>
+      <h2>Lernkarten</h2>
+      <div class="fc-counter"><span id="fc-current">1</span>/<span id="fc-total">0</span></div>
+    </div>
+    <div class="fc-deck-selector">
+      <button class="fc-deck-btn active" data-deck="fisi">📋 FISI AP2</button>
+      <button class="fc-deck-btn" data-deck="wiso">💼 WiSo</button>
+    </div>
+    <div class="fc-progress-bar"><div class="fc-progress" id="fc-progress"></div></div>
+    <div class="fc-card" id="fc-card">
+      <div class="fc-card-inner" id="fc-card-inner">
+        <div class="fc-card-front">
+          <div class="fc-label">FRAGE</div>
+          <div class="fc-text" id="fc-question"></div>
+        </div>
+        <div class="fc-card-back">
+          <div class="fc-label">ANTWORT</div>
+          <div class="fc-text" id="fc-answer"></div>
+        </div>
+      </div>
+    </div>
+    <p class="fc-hint">Klick auf die Karte zum Umdrehen</p>
+    <div class="fc-controls">
+      <button id="fc-prev" class="btn btn-secondary">← Zurück</button>
+      <button id="fc-shuffle" class="btn btn-secondary">🔀 Mischen</button>
+      <button id="fc-next" class="btn btn-primary">Weiter →</button>
+    </div>
+    <div class="fc-score">
+      <button id="fc-wrong" class="btn fc-btn-wrong">✗ Wusste ich nicht</button>
+      <button id="fc-right" class="btn fc-btn-right">✓ Gewusst!</button>
+    </div>
+    <div class="fc-stats-bar">
+      <span class="fc-stat-right" id="fc-stat-right">✓ 0</span>
+      <span class="fc-stat-wrong" id="fc-stat-wrong">✗ 0</span>
+      <span class="fc-stat-remaining" id="fc-stat-remaining">📚 0 übrig</span>
     </div>
   </div>
 
