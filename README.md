@@ -53,7 +53,7 @@ cd /opt
 sudo git clone https://github.com/niklask52t/syntaxterror.git
 sudo chown -R www-data:www-data /opt/syntaxterror
 cd /opt/syntaxterror
-npm install --production
+npm install --omit=dev
 ```
 
 ### 3. Systemd Service einrichten

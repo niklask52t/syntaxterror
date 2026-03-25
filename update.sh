@@ -39,7 +39,7 @@ cmd_update() {
     git pull origin dev 2>/dev/null || git pull 2>/dev/null || warn "Git pull fehlgeschlagen (kein Git-Repo?)"
 
     log "Installing dependencies..."
-    npm install --production
+    npm install --omit=dev
 
     if systemctl is-active --quiet "$SERVICE_NAME" 2>/dev/null; then
         log "Restarting service..."
