@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>SYNTAXTERROR - IT Quiz & Lernkarten</title>
+  <title>SYNTAXTERROR - IT Quiz Arena</title>
   <link rel="stylesheet" href="style.css">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
 </head>
@@ -14,7 +14,7 @@
   <div id="screen-menu" class="screen active">
     <div class="logo-container">
       <h1 class="logo glitch" data-text="SYNTAXTERROR">SYNTAXTERROR</h1>
-      <p class="subtitle">IT Quiz & Lernkarten &mdash; Kein Erbarmen</p>
+      <p class="subtitle">IT Quiz Arena &mdash; Kein Erbarmen</p>
     </div>
     <div class="menu-card">
       <div class="input-group">
@@ -27,20 +27,16 @@
       </div>
       <div class="btn-group">
         <button id="btn-create" class="btn btn-primary">
-          <span class="btn-icon">+</span> Quiz-Raum erstellen
+          <span class="btn-icon">+</span> Raum erstellen
         </button>
         <div class="divider"><span>oder</span></div>
         <div class="join-row">
           <input type="text" id="room-code" maxlength="5" placeholder="CODE" class="code-input" autocomplete="off">
           <button id="btn-join" class="btn btn-secondary">Beitreten</button>
         </div>
-        <div class="divider"><span>solo</span></div>
-        <button id="btn-flashcards" class="btn btn-secondary" style="width:100%">
-          📚 Lernkarten
-        </button>
       </div>
     </div>
-    <p class="footer-text">2-20 Spieler &bull; 100+ Fragen &bull; Kein Erbarmen</p>
+    <p class="footer-text">2-20 Spieler &bull; Quiz + Lernkarten &bull; Kein Erbarmen</p>
   </div>
 
   <!-- ── LOBBY ─────────────────────────────────────────────── -->
@@ -56,30 +52,70 @@
     <div class="lobby-content">
       <div class="players-grid" id="players-grid"></div>
       <div id="host-settings" class="settings-panel" style="display:none">
-        <h3>Einstellungen</h3>
-        <label style="font-size:.8rem;color:var(--text-dim);text-transform:uppercase;letter-spacing:1px;display:block;margin-bottom:8px">Kategorien</label>
-        <div class="category-selector" id="category-selector"></div>
-        <div class="setting-row">
-          <label>Fragen</label>
-          <div class="setting-control">
-            <button class="btn-sm" data-setting="questionCount" data-delta="-5">-</button>
-            <span id="setting-questions">15</span>
-            <button class="btn-sm" data-setting="questionCount" data-delta="5">+</button>
+        <h3>Spielmodus</h3>
+        <div class="mode-selector">
+          <button class="mode-btn active" data-mode="quiz">
+            <span class="mode-icon">🧠</span>
+            <span class="mode-name">IT Quiz</span>
+            <span class="mode-desc">Multiple Choice</span>
+          </button>
+          <button class="mode-btn" data-mode="flashcards">
+            <span class="mode-icon">📚</span>
+            <span class="mode-name">Lernkarten</span>
+            <span class="mode-desc">Frage & Antwort</span>
+          </button>
+        </div>
+
+        <!-- Quiz Settings -->
+        <div id="settings-quiz" class="mode-settings">
+          <label class="settings-label">Kategorien</label>
+          <div class="category-selector" id="category-selector"></div>
+          <div class="setting-row">
+            <label>Fragen</label>
+            <div class="setting-control">
+              <button class="btn-sm" data-setting="questionCount" data-delta="-5">-</button>
+              <span id="setting-questions">15</span>
+              <button class="btn-sm" data-setting="questionCount" data-delta="5">+</button>
+            </div>
+          </div>
+          <div class="setting-row">
+            <label>Sekunden pro Frage</label>
+            <div class="setting-control">
+              <button class="btn-sm" data-setting="timePerQuestion" data-delta="-5">-</button>
+              <span id="setting-time">15</span>
+              <button class="btn-sm" data-setting="timePerQuestion" data-delta="5">+</button>
+            </div>
           </div>
         </div>
-        <div class="setting-row">
-          <label>Sekunden pro Frage</label>
-          <div class="setting-control">
-            <button class="btn-sm" data-setting="timePerQuestion" data-delta="-5">-</button>
-            <span id="setting-time">15</span>
-            <button class="btn-sm" data-setting="timePerQuestion" data-delta="5">+</button>
+
+        <!-- Flashcard Settings -->
+        <div id="settings-flashcards" class="mode-settings" style="display:none">
+          <label class="settings-label">Deck</label>
+          <div class="category-selector" id="fc-deck-selector"></div>
+          <div class="setting-row">
+            <label>Karten</label>
+            <div class="setting-control">
+              <button class="btn-sm" data-setting="fcCount" data-delta="-5">-</button>
+              <span id="setting-fc-count">20</span>
+              <button class="btn-sm" data-setting="fcCount" data-delta="5">+</button>
+            </div>
+          </div>
+          <div class="setting-row">
+            <label>Sek. zum Nachdenken</label>
+            <div class="setting-control">
+              <button class="btn-sm" data-setting="fcTime" data-delta="-5">-</button>
+              <span id="setting-fc-time">15</span>
+              <button class="btn-sm" data-setting="fcTime" data-delta="5">+</button>
+            </div>
           </div>
         </div>
+
         <button id="btn-start" class="btn btn-primary btn-large" style="margin-top:20px">🚀 Spiel starten</button>
       </div>
       <div id="guest-waiting" class="waiting-panel" style="display:none">
         <button id="btn-ready" class="btn btn-secondary btn-large">✓ Bereit</button>
         <p class="waiting-text">Warte auf den Host...</p>
+        <p class="mode-display" id="guest-mode-display"></p>
       </div>
     </div>
   </div>
@@ -113,6 +149,35 @@
     </div>
   </div>
 
+  <!-- ── FLASHCARD QUESTION ────────────────────────────────── -->
+  <div id="screen-fc-question" class="screen">
+    <div class="question-header">
+      <div class="question-progress"><span id="fc-q-index">1</span>/<span id="fc-q-total">20</span></div>
+      <div class="timer-bar-container"><div class="timer-bar" id="fc-timer-bar"></div></div>
+      <div class="timer-text" id="fc-timer-text">15</div>
+    </div>
+    <div class="fc-question-card">
+      <div class="fc-label">FRAGE</div>
+      <div class="fc-question-text" id="fc-q-text"></div>
+    </div>
+    <div class="fc-rate-buttons" id="fc-rate-buttons">
+      <button id="fc-btn-knew" class="btn fc-btn-right">✓ Wusste ich</button>
+      <button id="fc-btn-didnt" class="btn fc-btn-wrong">✗ Keine Ahnung</button>
+    </div>
+    <div class="waiting-answer" id="fc-waiting" style="display:none">
+      <div class="pulse-dot"></div><span>Warte auf andere Spieler...</span>
+    </div>
+  </div>
+
+  <!-- ── FLASHCARD REVEAL ──────────────────────────────────── -->
+  <div id="screen-fc-reveal" class="screen">
+    <div class="result-container">
+      <div class="fc-reveal-answer" id="fc-reveal-answer"></div>
+      <div class="fc-reveal-stats" id="fc-reveal-stats"></div>
+      <div class="mini-leaderboard" id="fc-leaderboard"></div>
+    </div>
+  </div>
+
   <!-- ── GAME OVER ─────────────────────────────────────────── -->
   <div id="screen-gameover" class="screen">
     <div class="gameover-container">
@@ -128,50 +193,7 @@
     </div>
   </div>
 
-  <!-- ── FLASHCARDS ────────────────────────────────────────── -->
-  <div id="screen-flashcards" class="screen">
-    <div class="fc-header">
-      <button id="fc-back" class="btn btn-secondary">← Zurück</button>
-      <h2>Lernkarten</h2>
-      <div class="fc-counter"><span id="fc-current">1</span>/<span id="fc-total">0</span></div>
-    </div>
-    <div class="fc-deck-selector">
-      <button class="fc-deck-btn active" data-deck="fisi">📋 FISI AP2</button>
-      <button class="fc-deck-btn" data-deck="wiso">💼 WiSo</button>
-    </div>
-    <div class="fc-progress-bar"><div class="fc-progress" id="fc-progress"></div></div>
-    <div class="fc-card" id="fc-card">
-      <div class="fc-card-inner" id="fc-card-inner">
-        <div class="fc-card-front">
-          <div class="fc-label">FRAGE</div>
-          <div class="fc-text" id="fc-question"></div>
-        </div>
-        <div class="fc-card-back">
-          <div class="fc-label">ANTWORT</div>
-          <div class="fc-text" id="fc-answer"></div>
-        </div>
-      </div>
-    </div>
-    <p class="fc-hint">Klick auf die Karte zum Umdrehen</p>
-    <div class="fc-controls">
-      <button id="fc-prev" class="btn btn-secondary">← Zurück</button>
-      <button id="fc-shuffle" class="btn btn-secondary">🔀 Mischen</button>
-      <button id="fc-next" class="btn btn-primary">Weiter →</button>
-    </div>
-    <div class="fc-score">
-      <button id="fc-wrong" class="btn fc-btn-wrong">✗ Wusste ich nicht</button>
-      <button id="fc-right" class="btn fc-btn-right">✓ Gewusst!</button>
-    </div>
-    <div class="fc-stats-bar">
-      <span class="fc-stat-right" id="fc-stat-right">✓ 0</span>
-      <span class="fc-stat-wrong" id="fc-stat-wrong">✗ 0</span>
-      <span class="fc-stat-remaining" id="fc-stat-remaining">📚 0 übrig</span>
-    </div>
-  </div>
-
-  <!-- ── TOAST ─────────────────────────────────────────────── -->
   <div id="toast-container"></div>
-
   <script src="/socket.io/socket.io.js"></script>
   <script src="game.js"></script>
 </body>

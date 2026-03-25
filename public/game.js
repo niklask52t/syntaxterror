@@ -2,44 +2,31 @@
 const socket = io();
 
 let myId = null, isHost = false, roomCode = null, selectedAvatar = null;
-let questionCount = 15, timePerQuestion = 15;
+let gameMode = 'quiz', questionCount = 15, timePerQuestion = 15;
+let fcCount = 20, fcTime = 15, fcDeck = 'fisi';
 let timerInterval = null, timeLeft = 0, hasAnswered = false;
-let quizCategories = ['it', 'fisi'], availableCategories = {};
+let quizCategories = ['it', 'fisi'], availableCategories = {}, flashcardCategories = {};
 
 const $ = s => document.querySelector(s);
 const $$ = s => document.querySelectorAll(s);
-
 const screens = {
   menu: $('#screen-menu'), lobby: $('#screen-lobby'), countdown: $('#screen-countdown'),
   quiz: $('#screen-quiz'), 'quiz-result': $('#screen-quiz-result'),
-  gameover: $('#screen-gameover'), flashcards: $('#screen-flashcards'),
+  'fc-question': $('#screen-fc-question'), 'fc-reveal': $('#screen-fc-reveal'),
+  gameover: $('#screen-gameover'),
 };
 
-function showScreen(name) {
-  Object.values(screens).forEach(s => { if (s) s.classList.remove('active'); });
-  if (screens[name]) screens[name].classList.add('active');
-}
-
-function toast(msg, type = 'info') {
-  const el = document.createElement('div');
-  el.className = `toast ${type}`;
-  el.textContent = msg;
-  $('#toast-container').appendChild(el);
-  setTimeout(() => el.remove(), 3000);
-}
-
+function showScreen(name) { Object.values(screens).forEach(s => { if (s) s.classList.remove('active'); }); if (screens[name]) screens[name].classList.add('active'); }
+function toast(msg, type = 'info') { const el = document.createElement('div'); el.className = `toast ${type}`; el.textContent = msg; $('#toast-container').appendChild(el); setTimeout(() => el.remove(), 3000); }
 function escapeHtml(s) { const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
 function getPlayerName() { return ($('#player-name').value || '').trim() || 'Anon_' + Math.floor(Math.random() * 999); }
 
-// ── Avatars ──────────────────────────────────────────────────────────────
 const avatars = ['🧑‍💻','👾','🤖','💀','🦊','🐱','🎮','🕹️','🧠','🔥','⚡','🎯','🚀','💎','🦄','👻'];
 function initAvatarPicker() {
-  const picker = $('#avatar-picker');
-  picker.innerHTML = '';
+  const picker = $('#avatar-picker'); picker.innerHTML = '';
   avatars.forEach((a, i) => {
     const div = document.createElement('div');
-    div.className = 'avatar-option' + (i === 0 ? ' selected' : '');
-    div.textContent = a;
+    div.className = 'avatar-option' + (i === 0 ? ' selected' : ''); div.textContent = a;
     div.onclick = () => { $$('.avatar-option').forEach(el => el.classList.remove('selected')); div.classList.add('selected'); selectedAvatar = a; };
     picker.appendChild(div);
   });
@@ -47,13 +34,11 @@ function initAvatarPicker() {
 }
 
 function renderPlayers(players) {
-  const grid = $('#players-grid');
-  grid.innerHTML = '';
+  const grid = $('#players-grid'); grid.innerHTML = '';
   players.forEach(p => {
     const card = document.createElement('div');
     card.className = 'player-card' + (p.isHost ? ' host' : '') + (p.ready ? ' ready' : '');
-    card.innerHTML = `<div class="avatar">${p.avatar}</div><div class="name">${escapeHtml(p.name)}</div>
-      ${p.isHost ? '<span class="badge badge-host">👑 Host</span>' : ''}${p.ready ? '<span class="badge badge-ready">✓ Ready</span>' : ''}`;
+    card.innerHTML = `<div class="avatar">${p.avatar}</div><div class="name">${escapeHtml(p.name)}</div>${p.isHost ? '<span class="badge badge-host">👑 Host</span>' : ''}${p.ready ? '<span class="badge badge-ready">✓ Ready</span>' : ''}`;
     grid.appendChild(card);
   });
 }
@@ -63,33 +48,26 @@ function renderLeaderboard(container, leaderboard) {
   leaderboard.forEach((p, i) => {
     const row = document.createElement('div');
     row.className = 'lb-row' + (p.id === myId ? ' me' : '');
-    row.innerHTML = `<span class="lb-rank ${i===0?'gold':i===1?'silver':i===2?'bronze':''}">${i+1}</span>
-      <span class="lb-avatar">${p.avatar}</span><span class="lb-name">${escapeHtml(p.name)}</span>
-      <span class="lb-score">${p.score.toLocaleString()}</span>`;
+    row.innerHTML = `<span class="lb-rank ${i===0?'gold':i===1?'silver':i===2?'bronze':''}">${i+1}</span><span class="lb-avatar">${p.avatar}</span><span class="lb-name">${escapeHtml(p.name)}</span><span class="lb-score">${p.score.toLocaleString()}</span>`;
     container.appendChild(row);
   });
 }
 
 function startTimer(barEl, textEl, seconds) {
-  clearInterval(timerInterval);
-  timeLeft = seconds;
-  textEl.textContent = seconds;
-  textEl.classList.remove('danger');
-  barEl.style.transition = 'none'; barEl.style.width = '100%';
-  void barEl.offsetHeight;
-  barEl.style.transition = `width ${seconds}s linear`; barEl.style.width = '0%';
-  barEl.classList.remove('danger');
+  clearInterval(timerInterval); timeLeft = seconds;
+  textEl.textContent = seconds; textEl.classList.remove('danger');
+  barEl.style.transition = 'none'; barEl.style.width = '100%'; void barEl.offsetHeight;
+  barEl.style.transition = `width ${seconds}s linear`; barEl.style.width = '0%'; barEl.classList.remove('danger');
   timerInterval = setInterval(() => {
-    timeLeft = Math.max(0, timeLeft - 1);
-    textEl.textContent = Math.ceil(timeLeft);
+    timeLeft = Math.max(0, timeLeft - 1); textEl.textContent = Math.ceil(timeLeft);
     if (timeLeft <= 5) { textEl.classList.add('danger'); barEl.classList.add('danger'); }
     if (timeLeft <= 0) clearInterval(timerInterval);
   }, 1000);
 }
 
-// ══════════════════════════════════════════════════════════════════════════
-// MENU
-// ══════════════════════════════════════════════════════════════════════════
+const modeNames = { quiz: '🧠 IT Quiz', flashcards: '📚 Lernkarten' };
+
+// ── Menu ─────────────────────────────────────────────────────────────────
 $('#btn-create').onclick = () => { const n = getPlayerName(); $('#player-name').value = n; socket.emit('create-room', { playerName: n, avatar: selectedAvatar }); };
 $('#btn-join').onclick = () => {
   const n = getPlayerName(), code = ($('#room-code').value || '').trim().toUpperCase();
@@ -99,14 +77,22 @@ $('#btn-join').onclick = () => {
 $('#room-code').addEventListener('input', e => { e.target.value = e.target.value.toUpperCase(); });
 $('#room-code').addEventListener('keydown', e => { if (e.key === 'Enter') $('#btn-join').click(); });
 $('#player-name').addEventListener('keydown', e => { if (e.key === 'Enter') $('#btn-create').click(); });
-$('#btn-flashcards').onclick = () => { initFlashcards('fisi'); showScreen('flashcards'); };
 
-// ══════════════════════════════════════════════════════════════════════════
-// LOBBY
-// ══════════════════════════════════════════════════════════════════════════
+// ── Lobby ────────────────────────────────────────────────────────────────
 $('#btn-copy-code').onclick = () => navigator.clipboard.writeText(roomCode).then(() => toast('Code kopiert! 📋', 'success'));
 $('#btn-ready').onclick = () => socket.emit('toggle-ready');
 $('#btn-start').onclick = () => socket.emit('start-game');
+
+// Mode selector
+$$('.mode-btn').forEach(btn => {
+  btn.onclick = () => {
+    $$('.mode-btn').forEach(b => b.classList.remove('active')); btn.classList.add('active');
+    gameMode = btn.dataset.mode;
+    $$('.mode-settings').forEach(s => s.style.display = 'none');
+    const el = $(`#settings-${gameMode}`); if (el) el.style.display = 'block';
+    socket.emit('update-settings', { gameMode });
+  };
+});
 
 function renderCategorySelector() {
   const c = $('#category-selector'); if (!c) return; c.innerHTML = '';
@@ -123,48 +109,73 @@ function renderCategorySelector() {
   }
 }
 
+function renderFcDeckSelector() {
+  const c = $('#fc-deck-selector'); if (!c) return; c.innerHTML = '';
+  for (const [key, cat] of Object.entries(flashcardCategories)) {
+    const btn = document.createElement('button');
+    btn.className = 'cat-btn' + (key === fcDeck ? ' active' : '');
+    btn.textContent = `${cat.icon} ${cat.name} (${cat.count})`; btn.dataset.deck = key;
+    btn.onclick = () => {
+      fcDeck = key; $$('#fc-deck-selector .cat-btn').forEach(b => b.classList.toggle('active', b.dataset.deck === key));
+      socket.emit('update-settings', { fcDeck: key });
+    };
+    c.appendChild(btn);
+  }
+}
+
 $$('.btn-sm[data-setting]').forEach(btn => {
   btn.onclick = () => {
     const s = btn.dataset.setting, d = parseInt(btn.dataset.delta);
     if (s === 'questionCount') { questionCount = Math.min(Math.max(questionCount + d, 5), 40); $('#setting-questions').textContent = questionCount; }
     else if (s === 'timePerQuestion') { timePerQuestion = Math.min(Math.max(timePerQuestion + d, 5), 30); $('#setting-time').textContent = timePerQuestion; }
-    socket.emit('update-settings', { questionCount, timePerQuestion });
+    else if (s === 'fcCount') { fcCount = Math.min(Math.max(fcCount + d, 5), 50); $('#setting-fc-count').textContent = fcCount; }
+    else if (s === 'fcTime') { fcTime = Math.min(Math.max(fcTime + d, 5), 30); $('#setting-fc-time').textContent = fcTime; }
+    socket.emit('update-settings', { questionCount, timePerQuestion, fcCount, fcTime });
   };
 });
 
 $('#btn-play-again').onclick = () => socket.emit('play-again');
 $('#btn-back-menu').onclick = () => location.reload();
 
-// ══════════════════════════════════════════════════════════════════════════
-// SOCKET EVENTS
-// ══════════════════════════════════════════════════════════════════════════
+// ── Socket Events ────────────────────────────────────────────────────────
 socket.on('connect', () => { myId = socket.id; });
 socket.on('error-msg', msg => toast(msg, 'error'));
 
-socket.on('room-created', ({ code, players, categories }) => {
-  roomCode = code; isHost = true; availableCategories = categories || {};
+socket.on('room-created', ({ code, players, categories: cats, flashcardCategories: fcCats }) => {
+  roomCode = code; isHost = true; availableCategories = cats || {}; flashcardCategories = fcCats || {};
   $('#lobby-code').textContent = code; $('#host-settings').style.display = 'block'; $('#guest-waiting').style.display = 'none';
-  renderPlayers(players); renderCategorySelector(); showScreen('lobby'); toast('Raum erstellt! Teile den Code.', 'success');
+  renderPlayers(players); renderCategorySelector(); renderFcDeckSelector(); showScreen('lobby');
+  toast('Raum erstellt! Teile den Code.', 'success');
 });
 
-socket.on('room-joined', ({ code, players, categories }) => {
-  roomCode = code; isHost = false; availableCategories = categories || {};
+socket.on('room-joined', ({ code, players, categories: cats, flashcardCategories: fcCats }) => {
+  roomCode = code; isHost = false; availableCategories = cats || {}; flashcardCategories = fcCats || {};
   $('#lobby-code').textContent = code; $('#host-settings').style.display = 'none'; $('#guest-waiting').style.display = 'block';
   renderPlayers(players); showScreen('lobby');
 });
 
 socket.on('player-update', ({ players }) => renderPlayers(players));
 socket.on('settings-updated', s => {
+  if (s.gameMode) {
+    gameMode = s.gameMode;
+    $$('.mode-btn').forEach(b => b.classList.toggle('active', b.dataset.mode === s.gameMode));
+    $$('.mode-settings').forEach(el => el.style.display = 'none');
+    const el = $(`#settings-${s.gameMode}`); if (el) el.style.display = 'block';
+    if ($('#guest-mode-display')) $('#guest-mode-display').textContent = modeNames[s.gameMode] || '';
+  }
   if (s.questionCount) { questionCount = s.questionCount; $('#setting-questions').textContent = s.questionCount; }
   if (s.timePerQuestion) { timePerQuestion = s.timePerQuestion; $('#setting-time').textContent = s.timePerQuestion; }
-  if (s.quizCategories) { quizCategories = s.quizCategories; $$('.cat-btn').forEach(b => b.classList.toggle('active', quizCategories.includes(b.dataset.cat))); }
+  if (s.quizCategories) { quizCategories = s.quizCategories; $$('#category-selector .cat-btn').forEach(b => b.classList.toggle('active', quizCategories.includes(b.dataset.cat))); }
+  if (s.fcDeck) { fcDeck = s.fcDeck; $$('#fc-deck-selector .cat-btn').forEach(b => b.classList.toggle('active', b.dataset.deck === s.fcDeck)); }
+  if (s.fcCount) { fcCount = s.fcCount; $('#setting-fc-count').textContent = s.fcCount; }
+  if (s.fcTime) { fcTime = s.fcTime; $('#setting-fc-time').textContent = s.fcTime; }
 });
 socket.on('host-changed', ({ hostName }) => toast(`${hostName} ist jetzt Host! 👑`, 'info'));
 socket.on('player-left', ({ playerCount }) => toast(`Spieler hat verlassen (${playerCount} übrig)`, 'info'));
 
 // Countdown
-socket.on('game-started', () => {
-  showScreen('countdown');
+socket.on('game-started', ({ gameMode: gm }) => {
+  gameMode = gm; showScreen('countdown');
   let count = 3; $('#countdown-num').textContent = count;
   const ci = setInterval(() => {
     count--;
@@ -173,17 +184,15 @@ socket.on('game-started', () => {
   }, 800);
 });
 
-// Quiz
+// ── Quiz ─────────────────────────────────────────────────────────────────
 socket.on('quiz-question', ({ index, total, question, answers, time }) => {
   hasAnswered = false; showScreen('quiz');
   $('#q-index').textContent = index + 1; $('#q-total').textContent = total;
   $('#question-text').textContent = question; $('#waiting-answer').style.display = 'none';
   startTimer($('#timer-bar'), $('#timer-text'), time);
-  const startTime = Date.now(), grid = $('#answers-grid');
-  grid.innerHTML = '';
+  const startTime = Date.now(), grid = $('#answers-grid'); grid.innerHTML = '';
   ['A','B','C','D'].forEach((letter, i) => {
-    const btn = document.createElement('button');
-    btn.className = 'answer-btn';
+    const btn = document.createElement('button'); btn.className = 'answer-btn';
     btn.innerHTML = `<span class="answer-letter">${letter}</span><span>${escapeHtml(answers[i])}</span>`;
     btn.onclick = () => {
       if (hasAnswered) return; hasAnswered = true; clearInterval(timerInterval);
@@ -209,8 +218,34 @@ socket.on('quiz-result', ({ correctIndex, roast, playerResults, leaderboard }) =
   renderLeaderboard($('#mini-leaderboard'), leaderboard);
 });
 
-// Game Over
-socket.on('game-over', ({ leaderboard, questionHistory }) => {
+// ── Flashcard Multiplayer ────────────────────────────────────────────────
+let fcRated = false;
+
+socket.on('fc-question', ({ index, total, question, time }) => {
+  fcRated = false; showScreen('fc-question');
+  $('#fc-q-index').textContent = index + 1; $('#fc-q-total').textContent = total;
+  $('#fc-q-text').textContent = question;
+  $('#fc-rate-buttons').style.display = 'flex'; $('#fc-waiting').style.display = 'none';
+  startTimer($('#fc-timer-bar'), $('#fc-timer-text'), time);
+});
+
+$('#fc-btn-knew').onclick = () => { if (fcRated) return; fcRated = true; clearInterval(timerInterval); socket.emit('fc-rate', { knew: true }); $('#fc-rate-buttons').style.display = 'none'; $('#fc-waiting').style.display = 'flex'; };
+$('#fc-btn-didnt').onclick = () => { if (fcRated) return; fcRated = true; clearInterval(timerInterval); socket.emit('fc-rate', { knew: false }); $('#fc-rate-buttons').style.display = 'none'; $('#fc-waiting').style.display = 'flex'; };
+
+socket.on('fc-reveal', ({ answer, results, leaderboard }) => {
+  showScreen('fc-reveal');
+  $('#fc-reveal-answer').textContent = answer;
+  const stats = $('#fc-reveal-stats'); stats.innerHTML = '';
+  results.forEach(r => {
+    const row = document.createElement('div'); row.className = 'fc-reveal-row';
+    row.innerHTML = `<span class="fr-name">${escapeHtml(r.name)}</span><span class="fr-result ${r.answered ? (r.knew ? 'fr-knew' : 'fr-didnt') : 'fr-skip'}">${r.answered ? (r.knew ? '✓ Gewusst' : '✗ Nicht gewusst') : '— Keine Antwort'}</span>`;
+    stats.appendChild(row);
+  });
+  renderLeaderboard($('#fc-leaderboard'), leaderboard);
+});
+
+// ── Game Over ────────────────────────────────────────────────────────────
+socket.on('game-over', ({ leaderboard, questionHistory, gameMode: gm }) => {
   showScreen('gameover');
   const podium = $('#podium'); podium.innerHTML = '';
   const order = [];
@@ -226,16 +261,26 @@ socket.on('game-over', ({ leaderboard, questionHistory }) => {
   renderLeaderboard($('#final-leaderboard'), leaderboard);
   $('#btn-play-again').style.display = isHost ? 'block' : 'none';
 
+  // Stats
   const statsSection = $('#stats-section'), statsContainer = $('#stats-container');
   if (questionHistory && questionHistory.length > 0) {
     statsSection.style.display = 'block'; statsContainer.style.display = 'none'; statsContainer.innerHTML = '';
+    const isQuiz = gm === 'quiz';
     questionHistory.forEach((entry, i) => {
-      const total = Object.keys(entry.players).length;
-      const correct = Object.values(entry.players).filter(p => p.correct).length;
       const block = document.createElement('div'); block.className = 'stats-question';
-      block.innerHTML = `<div class="stats-q-header" data-idx="${i}"><span class="stats-q-num">#${i+1}</span><span class="stats-q-text">${escapeHtml(entry.question)}</span><span class="stats-q-correct">${correct}/${total}</span></div>
-        <div class="stats-q-body" id="stats-body-${i}"><div class="stats-q-answer">✓ ${escapeHtml(entry.correctAnswer)}</div>
-        ${Object.entries(entry.players).map(([, p]) => `<div class="stats-player-row"><span class="sp-name">${escapeHtml(p.name)}</span><span class="sp-result ${p.correct?'correct':p.answered?'wrong':'missed'}">${p.correct?'✓':p.answered?'✗':'—'}</span></div>`).join('')}</div>`;
+      if (isQuiz) {
+        const total = Object.keys(entry.players).length;
+        const correct = Object.values(entry.players).filter(p => p.correct).length;
+        block.innerHTML = `<div class="stats-q-header" data-idx="${i}"><span class="stats-q-num">#${i+1}</span><span class="stats-q-text">${escapeHtml(entry.question)}</span><span class="stats-q-correct">${correct}/${total}</span></div>
+          <div class="stats-q-body" id="stats-body-${i}"><div class="stats-q-answer">✓ ${escapeHtml(entry.correctAnswer)}</div>
+          ${Object.values(entry.players).map(p => `<div class="stats-player-row"><span class="sp-name">${escapeHtml(p.name)}</span><span class="sp-result ${p.correct?'correct':p.answered?'wrong':'missed'}">${p.correct?'✓':p.answered?'✗':'—'}</span></div>`).join('')}</div>`;
+      } else {
+        const total = Object.keys(entry.players).length;
+        const knew = Object.values(entry.players).filter(p => p.knew).length;
+        block.innerHTML = `<div class="stats-q-header" data-idx="${i}"><span class="stats-q-num">#${i+1}</span><span class="stats-q-text">${escapeHtml(entry.question)}</span><span class="stats-q-correct">${knew}/${total}</span></div>
+          <div class="stats-q-body" id="stats-body-${i}"><div class="stats-q-answer">${escapeHtml(entry.answer)}</div>
+          ${Object.values(entry.players).map(p => `<div class="stats-player-row"><span class="sp-name">${escapeHtml(p.name)}</span><span class="sp-result ${p.knew?'correct':p.answered?'wrong':'missed'}">${p.knew?'✓':p.answered?'✗':'—'}</span></div>`).join('')}</div>`;
+      }
       statsContainer.appendChild(block);
     });
     statsContainer.addEventListener('click', e => { const h = e.target.closest('.stats-q-header'); if (h) { const b = $(`#stats-body-${h.dataset.idx}`); if (b) b.classList.toggle('open'); } });
@@ -247,88 +292,11 @@ socket.on('back-to-lobby', ({ players }) => { renderPlayers(players); showScreen
 
 // Keyboard
 document.addEventListener('keydown', e => {
-  if (screens.quiz.classList.contains('active') && !hasAnswered) {
+  if (screens.quiz && screens.quiz.classList.contains('active') && !hasAnswered) {
     const m = { '1': 0, '2': 1, '3': 2, '4': 3, 'a': 0, 'b': 1, 'c': 2, 'd': 3 };
     const idx = m[e.key.toLowerCase()]; if (idx !== undefined) { const btns = $$('.answer-btn'); if (btns[idx]) btns[idx].click(); }
   }
-  if (screens.flashcards.classList.contains('active')) {
-    if (e.key === ' ') { e.preventDefault(); $('#fc-card').classList.toggle('flipped'); }
-    if (e.key === 'ArrowRight') $('#fc-next').click();
-    if (e.key === 'ArrowLeft') $('#fc-prev').click();
-  }
 });
 
-// ══════════════════════════════════════════════════════════════════════════
-// FLASHCARDS (Singleplayer)
-// ══════════════════════════════════════════════════════════════════════════
-let fcCards = [], fcIndex = 0, fcRight = 0, fcWrong = 0, fcDeck = 'fisi';
-const fcCache = {};
-
-async function loadDeck(deck) {
-  if (fcCache[deck]) return fcCache[deck];
-  const res = await fetch(`/flashcards-${deck}.json`);
-  const data = await res.json();
-  fcCache[deck] = data;
-  return data;
-}
-
-async function initFlashcards(deck) {
-  fcDeck = deck;
-  $$('.fc-deck-btn').forEach(b => b.classList.toggle('active', b.dataset.deck === deck));
-  const data = await loadDeck(deck);
-  fcCards = [...data]; fcIndex = 0; fcRight = 0; fcWrong = 0;
-  renderFlashcard();
-}
-
-function renderFlashcard() {
-  if (fcCards.length === 0) {
-    $('#fc-question').textContent = 'Keine Karten mehr! 🎉';
-    $('#fc-answer').textContent = 'Du hast alle durchgearbeitet.';
-    $('#fc-current').textContent = '0'; $('#fc-total').textContent = '0';
-    return;
-  }
-  const card = fcCards[fcIndex];
-  $('#fc-question').textContent = card.q;
-  $('#fc-answer').textContent = card.a;
-  $('#fc-current').textContent = fcIndex + 1;
-  $('#fc-total').textContent = fcCards.length;
-  $('#fc-card').classList.remove('flipped');
-  $('#fc-progress').style.width = ((fcIndex + 1) / fcCards.length * 100) + '%';
-  $('#fc-stat-right').textContent = `✓ ${fcRight}`;
-  $('#fc-stat-wrong').textContent = `✗ ${fcWrong}`;
-  $('#fc-stat-remaining').textContent = `📚 ${fcCards.length} übrig`;
-}
-
-function shuffleCards() {
-  for (let i = fcCards.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [fcCards[i], fcCards[j]] = [fcCards[j], fcCards[i]];
-  }
-  fcIndex = 0;
-  renderFlashcard();
-  toast('Karten gemischt! 🔀', 'info');
-}
-
-$('#fc-card').onclick = () => $('#fc-card').classList.toggle('flipped');
-$('#fc-next').onclick = () => { if (fcCards.length > 0) { fcIndex = (fcIndex + 1) % fcCards.length; renderFlashcard(); } };
-$('#fc-prev').onclick = () => { if (fcCards.length > 0) { fcIndex = (fcIndex - 1 + fcCards.length) % fcCards.length; renderFlashcard(); } };
-$('#fc-shuffle').onclick = shuffleCards;
-$('#fc-back').onclick = () => showScreen('menu');
-
-$('#fc-right').onclick = () => {
-  fcRight++; fcCards.splice(fcIndex, 1);
-  if (fcIndex >= fcCards.length) fcIndex = 0;
-  renderFlashcard();
-};
-$('#fc-wrong').onclick = () => {
-  fcWrong++; fcIndex = (fcIndex + 1) % fcCards.length;
-  renderFlashcard();
-};
-
-$$('.fc-deck-btn').forEach(btn => {
-  btn.onclick = () => initFlashcards(btn.dataset.deck);
-});
-
-// ── Init ─────────────────────────────────────────────────────────────────
 initAvatarPicker();
 $('#player-name').focus();
