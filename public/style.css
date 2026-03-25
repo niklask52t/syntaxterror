@@ -687,6 +687,46 @@ input::placeholder { color: var(--text-dim); opacity: .6; }
 
 .final-leaderboard { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); margin-bottom: 24px; overflow: hidden; }
 
+/* ── Stats ─────────────────────────────────────────────────────────────── */
+#screen-gameover { justify-content: flex-start; padding-top: 30px; }
+
+.stats-container { width: 100%; margin-bottom: 24px; }
+
+.stats-question {
+  background: var(--bg-card); border: 1px solid var(--border);
+  border-radius: var(--radius); margin-bottom: 10px; overflow: hidden;
+}
+.stats-q-header {
+  padding: 12px 16px; font-weight: 700; font-size: .85rem;
+  display: flex; align-items: center; gap: 10px;
+  border-bottom: 1px solid var(--border); cursor: pointer;
+  transition: background .15s;
+}
+.stats-q-header:hover { background: var(--bg-card-hover); }
+.stats-q-num { color: var(--text-dim); font-family: var(--mono); font-size: .75rem; min-width: 28px; }
+.stats-q-text { flex: 1; text-align: left; }
+.stats-q-correct { font-family: var(--mono); font-size: .75rem; color: var(--success); }
+
+.stats-q-body { display: none; padding: 0 16px 12px; }
+.stats-q-body.open { display: block; }
+
+.stats-q-answer {
+  font-size: .8rem; color: var(--success); font-weight: 600;
+  margin-bottom: 8px; padding: 6px 10px;
+  background: rgba(16,185,129,.08); border-radius: 6px;
+}
+
+.stats-player-row {
+  display: flex; align-items: center; gap: 8px;
+  padding: 4px 0; font-size: .8rem;
+}
+.stats-player-row .sp-avatar { font-size: 1rem; }
+.stats-player-row .sp-name { flex: 1; font-weight: 600; text-align: left; }
+.stats-player-row .sp-result { font-family: var(--mono); font-weight: 700; }
+.stats-player-row .sp-result.correct { color: var(--success); }
+.stats-player-row .sp-result.wrong { color: var(--accent); }
+.stats-player-row .sp-result.missed { color: var(--text-dim); }
+
 /* ── Toast ─────────────────────────────────────────────────────────────── */
 #toast-container { position: fixed; top: 20px; right: 20px; z-index: 9999; display: flex; flex-direction: column; gap: 8px; }
 

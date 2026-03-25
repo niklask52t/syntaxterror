@@ -135,7 +135,7 @@ io.on('connection', (socket) => {
       gameMode: 'quiz',
       quizCategories: ['it', 'fisi'],
       currentQuestion: 0, questions: [], questionCount: 15, timePerQuestion: 15,
-      answers: new Map(), questionTimer: null,
+      answers: new Map(), questionTimer: null, questionHistory: [],
       typingRound: 0, typingRounds: 10, typingResults: new Map(),
       estimates: new Map(),
       emojiRound: 0, emojiRounds: 8, emojiTaps: new Map(),
@@ -295,6 +295,7 @@ function startQuiz(room) {
   }
   if (pool.length === 0) pool = quizQuestions.it;
   room.questions = shuffle(pool).slice(0, room.questionCount);
+  room.questionHistory = [];
   setTimeout(() => sendQuiz(room), 2500);
 }
 
@@ -322,6 +323,14 @@ function revealQuiz(room) {
       answered: !!a,
     });
   }
+  // Track history for end-of-game stats
+  const historyEntry = { question: q.q, correctIndex: q.correct, correctAnswer: q.answers[q.correct], players: {} };
+  for (const [id, p] of room.players) {
+    const a = room.answers.get(id);
+    historyEntry.players[id] = { name: p.name, correct: a ? a.correct : false, answered: !!a };
+  }
+  room.questionHistory.push(historyEntry);
+
   io.to(room.code).emit('quiz-result', { correctIndex: q.correct, roast: q.roast, playerResults: results, leaderboard: getLeaderboard(room) });
   room.currentQuestion++;
   setTimeout(() => sendQuiz(room), 5000);
@@ -431,7 +440,10 @@ function revealEmoji(room) {
 
 function endGame(room) {
   room.state = 'results';
-  io.to(room.code).emit('game-over', { leaderboard: getLeaderboard(room) });
+  io.to(room.code).emit('game-over', {
+    leaderboard: getLeaderboard(room),
+    questionHistory: room.gameMode === 'quiz' ? room.questionHistory : null,
+  });
 }
 
 function getLeaderboard(room) {

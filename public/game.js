@@ -647,7 +647,7 @@ socket.on('emoji-result', ({ results, leaderboard }) => {
 // ══════════════════════════════════════════════════════════════════════════
 // GAME OVER
 // ══════════════════════════════════════════════════════════════════════════
-socket.on('game-over', ({ leaderboard }) => {
+socket.on('game-over', ({ leaderboard, questionHistory }) => {
   showScreen('gameover');
   const podium = $('#podium');
   podium.innerHTML = '';
@@ -674,6 +674,59 @@ socket.on('game-over', ({ leaderboard }) => {
 
   renderLeaderboard($('#final-leaderboard'), leaderboard);
   $('#btn-play-again').style.display = isHost ? 'block' : 'none';
+
+  // Stats section
+  const statsSection = $('#stats-section');
+  const statsContainer = $('#stats-container');
+  if (questionHistory && questionHistory.length > 0) {
+    statsSection.style.display = 'block';
+    statsContainer.style.display = 'none';
+    statsContainer.innerHTML = '';
+
+    questionHistory.forEach((entry, i) => {
+      const totalPlayers = Object.keys(entry.players).length;
+      const correctCount = Object.values(entry.players).filter(p => p.correct).length;
+
+      const block = document.createElement('div');
+      block.className = 'stats-question';
+      block.innerHTML = `
+        <div class="stats-q-header" data-idx="${i}">
+          <span class="stats-q-num">#${i + 1}</span>
+          <span class="stats-q-text">${escapeHtml(entry.question)}</span>
+          <span class="stats-q-correct">${correctCount}/${totalPlayers}</span>
+        </div>
+        <div class="stats-q-body" id="stats-body-${i}">
+          <div class="stats-q-answer">✓ ${escapeHtml(entry.correctAnswer)}</div>
+          ${Object.entries(entry.players).map(([pid, p]) => `
+            <div class="stats-player-row">
+              <span class="sp-name">${escapeHtml(p.name)}</span>
+              <span class="sp-result ${p.correct ? 'correct' : p.answered ? 'wrong' : 'missed'}">
+                ${p.correct ? '✓' : p.answered ? '✗' : '—'}
+              </span>
+            </div>
+          `).join('')}
+        </div>
+      `;
+      statsContainer.appendChild(block);
+    });
+
+    // Toggle per question
+    statsContainer.addEventListener('click', (e) => {
+      const header = e.target.closest('.stats-q-header');
+      if (!header) return;
+      const body = $(`#stats-body-${header.dataset.idx}`);
+      if (body) body.classList.toggle('open');
+    });
+
+    // Toggle button
+    $('#btn-toggle-stats').onclick = () => {
+      const visible = statsContainer.style.display !== 'none';
+      statsContainer.style.display = visible ? 'none' : 'block';
+      $('#btn-toggle-stats').textContent = visible ? '📊 Statistik anzeigen' : '📊 Statistik ausblenden';
+    };
+  } else {
+    statsSection.style.display = 'none';
+  }
 });
 
 socket.on('back-to-lobby', ({ players }) => {
