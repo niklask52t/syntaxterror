@@ -339,6 +339,11 @@ input::placeholder { color: var(--text-dim); opacity: .6; }
   color: var(--primary-glow);
 }
 
+#screen-lobby {
+  justify-content: flex-start;
+  padding-top: 40px;
+}
+
 /* ── Lobby ────────────────────────────────────────────────────────────── */
 .lobby-header {
   display: flex; align-items: center; justify-content: space-between;

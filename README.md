@@ -4,7 +4,7 @@
 
 Echtzeit-Multiplayer-Browserspiel mit 4 Game Modes. Gebaut für LAN-Partys, Azubi-Abende und alle die denken sie hätten IT-Wissen. Spoiler: haben sie nicht.
 
-![Node.js](https://img.shields.io/badge/Node.js-18+-green)
+![Node.js](https://img.shields.io/badge/Node.js-22+-green)
 ![Socket.IO](https://img.shields.io/badge/Socket.IO-4.x-blue)
 ![License](https://img.shields.io/badge/License-ISC-yellow)
 

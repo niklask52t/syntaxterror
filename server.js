@@ -57,7 +57,7 @@ const typingSnippets = [
   { code: 'git rebase -i HEAD~3 && git push --force-with-lease', lang: 'Git', difficulty: 3 },
   { code: 'sudo systemctl restart nginx', lang: 'Linux', difficulty: 1 },
   { code: 'Object.keys(obj).forEach(k => console.log(k));', lang: 'JavaScript', difficulty: 3 },
-  { code: 'FROM node:18-alpine AS builder', lang: 'Dockerfile', difficulty: 2 },
+  { code: 'FROM node:22-alpine AS builder', lang: 'Dockerfile', difficulty: 2 },
   { code: 'grep -rn "TODO" --include="*.js" .', lang: 'Bash', difficulty: 2 },
   { code: 'ip addr show eth0 | grep inet', lang: 'Linux', difficulty: 2 },
 ];

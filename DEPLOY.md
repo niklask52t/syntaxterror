@@ -5,7 +5,7 @@
 ### 1. Node.js installieren
 
 ```bash
-curl -fsSL https://deb.nodesource.com/setup_20.x | sudo bash -
+curl -fsSL https://deb.nodesource.com/setup_22.x | sudo bash -
 sudo apt install -y nodejs
 ```
 
