@@ -5,7 +5,7 @@ let myId = null, isHost = false, roomCode = null, selectedAvatar = null;
 let gameMode = 'quiz', questionCount = 15, timePerQuestion = 15;
 let typingRounds = 10, emojiRounds = 8;
 let timerInterval = null, timeLeft = 0, hasAnswered = false;
-let quizCategories = ['it', 'fisi'], availableCategories = {};
+let quizCategories = ['it'], availableCategories = {};
 
 const $ = s => document.querySelector(s);
 const $$ = s => document.querySelectorAll(s);

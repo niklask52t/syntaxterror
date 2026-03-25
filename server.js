@@ -177,7 +177,7 @@ io.on('connection', (socket) => {
       code, host: socket.id, players: new Map(), state: 'lobby',
       gameMode: 'quiz',
       // Quiz settings
-      quizCategories: ['it', 'fisi'], currentQuestion: 0, questions: [],
+      quizCategories: ['it'], currentQuestion: 0, questions: [],
       questionCount: 15, timePerQuestion: 15,
       answers: new Map(), questionTimer: null, questionHistory: [],
       // Typing settings

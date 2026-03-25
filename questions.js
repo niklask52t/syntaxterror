@@ -35,10 +35,7 @@ const quizQuestions = {
     { q: "Was ist 'CORS'?", answers: ["Cross-Origin Resource Sharing", "Computer Online Resource System", "Ein Fitness-Kurs", "Corrected Operating Standard"], correct: 0, roast: "CORS-Errors: Der Endboss jeder Frontend-Entwicklung." },
     { q: "Was ist der Unterschied zwischen Git und GitHub?", answers: ["Kein Unterschied", "Git = VCS, GitHub = Hosting", "GitHub ist Premium", "Git ist älter"], correct: 1, roast: "Das eine ist das Konzept, das andere die Plattform." },
     { q: "Was ist 'Blockchain'?", answers: ["Verteiltes, unveränderliches Ledger", "Kette aus Blöcken (Lego)", "Verschlüsselte Technologie", "Lösung für ALLE Probleme"], correct: 0, roast: "Blockchain: Die Antwort auf eine Frage die niemand gestellt hat. 🚀" },
-  ],
 
-  // ── FISI / IHK ────────────────────────────────────────────────────────
-  fisi: [
     // Netzwerktechnik
     { q: "Welche Subnetzmaske hat ein /24 Netz?", answers: ["255.255.0.0", "255.255.255.0", "255.255.255.128", "255.0.0.0"], correct: 1, roast: "Das ist FISI Grundwissen. Dein Ausbilder weint gerade." },
     { q: "Welcher Port wird für HTTPS verwendet?", answers: ["80", "443", "8080", "22"], correct: 1, roast: "Port 443. Wenn du das nicht weißt, solltest du dein IHK-Zeugnis zurückgeben." },
@@ -140,7 +137,6 @@ const quizQuestions = {
 // ── CATEGORY METADATA ───────────────────────────────────────────────────
 const categories = {
   it: { name: 'IT Allgemein', icon: '💻' },
-  fisi: { name: 'FISI / IHK', icon: '📋' },
   allgemein: { name: 'Allgemeinwissen', icon: '🌍' },
 };
 
