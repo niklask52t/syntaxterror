@@ -2,7 +2,7 @@
 
 > Multiplayer Browser Arena - Kein Erbarmen.
 
-Echtzeit-Multiplayer-Browserspiel mit 4 Game Modes. Gebaut fuer LAN-Partys, Azubi-Abende und alle die denken sie haetten IT-Wissen. Spoiler: haben sie nicht.
+Echtzeit-Multiplayer-Browserspiel mit 4 Game Modes. Gebaut für LAN-Partys, Azubi-Abende und alle die denken sie hätten IT-Wissen. Spoiler: haben sie nicht.
 
 ![Node.js](https://img.shields.io/badge/Node.js-18+-green)
 ![Socket.IO](https://img.shields.io/badge/Socket.IO-4.x-blue)
@@ -14,20 +14,20 @@ Echtzeit-Multiplayer-Browserspiel mit 4 Game Modes. Gebaut fuer LAN-Partys, Azub
 |------|-------------|---------|
 | **IT Quiz** | Kahoot-Style Quiz mit brutalen Roasts. Kategorien: IT Allgemein, FISI/IHK, Allgemeinwissen | 2-20 |
 | **Speed Typing** | Code-Snippets auf Zeit abtippen (JS, SQL, Docker, Bash...) | 2-20 |
-| **Schaetz-Arena** | IT-Schaetzfragen - wer am naechsten dran ist gewinnt | 2-20 |
-| **Emoji Roulette** | Reaktionstest - drueck wenn das richtige Emoji erscheint | 2-20 |
+| **Schätz-Arena** | IT-Schätzfragen - wer am nächsten dran ist gewinnt | 2-20 |
+| **Emoji Roulette** | Reaktionstest - drück wenn das richtige Emoji erscheint | 2-20 |
 
 ## Features
 
 - Echtzeit-Multiplayer via Socket.IO
 - Room-System mit 5-stelligem Code
-- Host waehlt Game Mode, Kategorien und Einstellungen
-- 70+ FISI/IHK-Pruefungsfragen (Netzwerk, Sicherheit, Datenbanken, Projektmanagement)
+- Host wählt Game Mode, Kategorien und Einstellungen
+- 70+ FISI/IHK-Prüfungsfragen (Netzwerk, Sicherheit, Datenbanken, Projektmanagement)
 - Brutale Roasts bei falschen Antworten
 - Streak-System mit Kill-Nachrichten
 - Podium & Leaderboard
 - Dark Mode UI mit Glitch-Animationen
-- Keyboard-Shortcuts (1-4/A-D im Quiz, Space fuer Emoji-Tap)
+- Keyboard-Shortcuts (1-4/A-D im Quiz, Space für Emoji-Tap)
 - Responsive Design
 
 ## Schnellstart
@@ -43,7 +43,7 @@ Dann im Browser: `http://localhost:3000`
 
 ## Deployment (Debian)
 
-Siehe [DEPLOY.md](DEPLOY.md) fuer eine Anleitung zum Deployment auf Debian 13.
+Siehe [DEPLOY.md](DEPLOY.md) für eine Anleitung zum Deployment auf Debian 13.
 
 ## Tech Stack
 

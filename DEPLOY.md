@@ -20,9 +20,9 @@ npm install
 npm start
 ```
 
-Laeuft jetzt auf `http://DEINE-IP:3000`
+Läuft jetzt auf `http://DEINE-IP:3000`
 
-### 3. Systemd Service (laeuft dauerhaft)
+### 3. Systemd Service (läuft dauerhaft)
 
 ```bash
 sudo tee /etc/systemd/system/syntaxterror.service > /dev/null << 'EOF'
@@ -50,7 +50,7 @@ sudo systemctl enable syntaxterror
 sudo systemctl start syntaxterror
 ```
 
-### 4. Status pruefen
+### 4. Status prüfen
 
 ```bash
 sudo systemctl status syntaxterror

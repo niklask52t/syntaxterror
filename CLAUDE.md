@@ -1,10 +1,10 @@
 # SYNTAXTERROR - Claude Code Context
 
 ## Projektbeschreibung
-Echtzeit-Multiplayer-Browserspiel mit 4 Game Modes (IT Quiz, Speed Typing, Schaetz-Arena, Emoji Roulette). Node.js + Socket.IO Backend, Vanilla Frontend.
+Echtzeit-Multiplayer-Browserspiel mit 4 Game Modes (IT Quiz, Speed Typing, Schätz-Arena, Emoji Roulette). Node.js + Socket.IO Backend, Vanilla Frontend.
 
 ## Architektur
-- `server.js` - Express-Server, Socket.IO Events, Game Logic fuer alle 4 Modi
+- `server.js` - Express-Server, Socket.IO Events, Game Logic für alle 4 Modi
 - `questions.js` - Quiz-Fragen kategorisiert (it, fisi, allgemein), exportiert als CommonJS
 - `public/index.html` - Alle Screens als hidden divs, screen-switching via JS
 - `public/style.css` - Komplettes Dark-Theme UI
@@ -25,4 +25,4 @@ Echtzeit-Multiplayer-Browserspiel mit 4 Game Modes (IT Quiz, Speed Typing, Schae
 
 ## Deployment
 - `npm start` startet den Server auf Port 3000 (oder PORT env var)
-- `update.sh` fuer Debian-Server: pulled, installiert, restartet systemd service
+- `update.sh` für Debian-Server: pulled, installiert, restartet systemd service
